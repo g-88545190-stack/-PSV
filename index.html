@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>五年级美术 30 题互动测验 - 拖拽填空与卡通收集</title>
+  <style>
+    :root {
+      --primary: #4A90E2;
+      --secondary: #F5A623;
+      --success: #7ED321;
+      --danger: #D0021B;
+      --bg-color: #F0F4F8;
+      --card-bg: #FFFFFF;
+      --text: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      margin: 0;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      margin: 5px 0;
+      font-size: 1.5rem;
+      color: #2C3E50;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 10px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .progress-bar-container {
+      width: 50%;
+      background: #E0E0E0;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--secondary);
+      transition: width 0.3s ease;
+    }
+
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .quiz-card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+      position: relative;
+    }
+
+    .question-title {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      color: #34495E;
+    }
+
+    .drop-target {
+      display: inline-block;
+      min-width: 110px;
+      height: 36px;
+      border: 2px dashed #95A5A6;
+      border-radius: 8px;
+      vertical-align: middle;
+      margin: 0 5px;
+      background-color: #FAFAFA;
+      text-align: center;
+      line-height: 32px;
+      font-weight: bold;
+      color: var(--primary);
+      transition: all 0.2s ease;
+    }
+
+    .drop-target.hover {
+      border-color: var(--primary);
+      background-color: #EBF5FB;
+    }
+
+    .drop-target.filled {
+      border-style: solid;
+      border-color: var(--primary);
+      background-color: #EBF5FB;
+    }
+
+    .drop-target.correct {
+      border-color: var(--success);
+      background-color: #E8F8F5;
+      color: var(--success);
+    }
+
+    .drop-target.incorrect {
+      border-color: var(--danger);
+      background-color: #FDEDEC;
+      color: var(--danger);
+    }
+
+    .options-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 15px;
+      min-height: 50px;
+      padding: 10px;
+      background: #F8F9F9;
+      border-radius: 12px;
+    }
+
+    .draggable-option {
+      background-color: var(--primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: grab;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.2s, background-color 0.2s;
+      touch-action: none;
+    }
+
+    .draggable-option:active {
+      cursor: grabbing;
+      transform: scale(1.05);
+    }
+
+    .draggable-option.selected {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-submit {
+      background-color: var(--secondary);
+      color: white;
+    }
+
+    .btn-next {
+      background-color: var(--primary);
+      color: white;
+      display: none;
+    }
+
+    /* 卡通画廊与奖励 */
+    .character-collection {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .collection-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+    }
+
+    .grid-gallery {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 6px;
+    }
+
+    .avatar-slot {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: #EAECEE;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      opacity: 0.3;
+      filter: grayscale(100%);
+      transition: all 0.3s;
+    }
+
+    .avatar-slot.unlocked {
+      opacity: 1;
+      filter: grayscale(0%);
+      background: #FEF9E7;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      transform: scale(1.05);
+    }
+
+    /* 弹窗样式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      max-width: 320px;
+      width: 90%;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-avatar {
+      font-size: 4rem;
+      margin: 10px 0;
+      animation: bounce 0.6s ease infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+
+    @media (max-width: 600px) {
+      .grid-gallery {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🎨 五年级美术 10 种手法大挑战</h1>
+  </header>
+
+  <div class="top-bar">
+    <div>题目: <span id="current-q">1</span> / 30</div>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div>收集: <span id="score">0</span> 🐾</div>
+  </div>
+
+  <div class="main-container">
+    <div class="quiz-card">
+      <div class="question-title" id="question-text">
+        <!-- 动态生成题目文本与拖拽目标 zone -->
+      </div>
+
+      <div class="options-container" id="options-box">
+        <!-- 动态生成选项按钮 -->
+      </div>
+
+      <div class="actions">
+        <div></div>
+        <button class="btn-submit" id="btn-submit" onclick="checkAnswer()">提交答案</button>
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">下一题 ➔</button>
+      </div>
+    </div>
+
+    <!-- 卡通人物集邮墙 -->
+    <div class="character-collection">
+      <div class="collection-title">
+        <span>🎨 卡通伙伴收集图鉴</span>
+        <span id="collected-count">0 / 30</span>
+      </div>
+      <div class="grid-gallery" id="gallery">
+        <!-- 30个插槽 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 获得卡通提示弹窗 -->
+  <div class="modal-overlay" id="reward-modal">
+    <div class="modal-card">
+      <h2 style="color:#27AE60; margin:0;">回答正确！</h2>
+      <div class="modal-avatar" id="modal-char-icon">🦁</div>
+      <p>解开了伙伴：<strong id="modal-char-name">小狮子</strong>！</p>
+      <button class="btn-submit" onclick="closeModal()">收下伙伴</button>
+    </div>
+  </div>
+
+  <script>
+    // 30 个卡通形象列表
+    const characters = [
+      { name: "聪慧狐", icon: "🦊" }, { name: "活力狗", icon: "🐶" }, { name: "萌萌猫", icon: "🐱" },
+      { name: "勇敢狮", icon: "🦁" }, { name: "憨厚熊", icon: "🐻" }, { name: "可爱的熊猫", icon: "🐼" },
+      { name: "机智猴", icon: "🐒" }, { name: "温顺兔", icon: "🐰" }, { name: "小猪宝", icon: "🐷" },
+      { name: "灵巧鼠", icon: "🐭" }, { name: "彩虹鸟", icon: "🦜" }, { name: "智慧企鹅", icon: "🐧" },
+      { name: "小青蛙", icon: "🐸" }, { name: "快乐海豚", icon: "🐬" }, { name: "小鹿斑比", icon: "🦌" },
+      { name: "独角兽", icon: "🦄" }, { name: "小老鹰", icon: "🦅" }, { name: "喵星人", icon: "🐯" },
+      { name: "仓鼠宝", icon: "🐹" }, { name: "小公鸡", icon: "🐓" }, { name: "小黄鸭", icon: "🦆" },
+      { name: "长颈鹿", icon: "🦒" }, { name: "小象宝", icon: "🐘" }, { name: "小考拉", icon: "🐨" },
+      { name: "小松鼠", icon: "🐿️" }, { name: "小刺猬", icon: "🦔" }, { name: "小火烈鸟", icon: "🦩" },
+      { name: "小猫头鹰", icon: "🦉" }, { name: "小蜜蜂", icon: "🐝" }, { name: "小蝴蝶", icon: "🦋" }
+    ];
+
+    // 30 道填空题数据
+    const quizData = [
+      // 1. 刮画
+      { text: "刮画是使用竹签等工具在竹签刮开表层漆色，显露出底层的", answer: "丰富色彩", options: ["丰富色彩", "透视线条", "水墨晕染", "金属丝"] },
+      { text: "刮画纸通常分为两层，底层是彩色的，表层则是覆盖着", answer: "黑色蜡层", options: ["黑色蜡层", "透明胶水", "水彩颜料", "黏土层"] },
+      { text: "在创作刮画时，使用的主要硬质刮画工具有", answer: "竹棒或牙签", options: ["竹棒或牙签", "毛笔", "喷枪", "雕刻凿刀"] },
+      
+      // 2. 透视
+      { text: "单点透视（平行透视）在画面中只有", answer: "一个消失点", options: ["一个消失点", "两个消失点", "三个消失点", "零个消失点"] },
+      { text: "双点透视通常用于表现物体的角观，在视平线上具有", answer: "两个消失点", options: ["两个消失点", "一个消失点", "无数消失点", "圆形消失点"] },
+      { text: "在透视绘画中，距离观察者越近的物体看起来越大，越远的越小，这被称为", answer: "近大远小", options: ["近大远小", "近小远大", "前明后暗", "遮挡关系"] },
+
+      // 3. 绘画技法
+      { text: "在水彩画中，利用水份使颜色在湿润的纸上自然扩散的技法叫", answer: "渲染法", options: ["渲染法", "干刷法", "平涂法", "刮擦法"] },
+      { text: "将笔头蘸取较浓干的颜料，在干燥纸面上快速刷出纹理的技法称为", answer: "干笔法", options: ["干笔法", "湿画法", "滴画法", "喷洒法"] },
+      { text: "在画作中均匀地涂抹单一纯色，不产生明暗变化的涂色技法叫", answer: "平涂法", options: ["平涂法", "渐变法", "晕染法", "点彩法"] },
+
+      // 4. 滴画
+      { text: "滴画（Drip Painting）创作时，将稀释的颜料直接滴落或甩洒在", answer: "画布或画纸", options: ["画布或画纸", "雕刻木板", "陶土表面", "刺绣布上"] },
+      { text: "滴画这种艺术手法最强调的是创作过程中的随机性与", answer: "节奏感", options: ["节奏感", "精确度", "对称性", "写实性"] },
+      { text: "为了让滴画的颜料能够顺利顺畅地滴流，通常需要将颜料进行", answer: "加水稀释", options: ["加水稀释", "高温加热", "混合黏土", "冷冻结块"] },
+
+      // 5. 固定雕塑
+      { text: "固定雕塑（Solid Sculpture）的特点是形态固定，无法像动感雕塑那样", answer: "随风摆动", options: ["随风摆动", "长期保存", "呈现色彩", "放置于室外"] },
+      { text: "制作固定雕塑时，通常需要先用铁丝或木棍搭出支撑结构的", answer: "内部骨架", options: ["内部骨架", "表面花纹", "外壳包装", "底座拓印"] },
+      { text: "以下哪种材料最适合用来包裹骨架制作固定雕塑？", answer: "超轻黏土/报纸浆", options: ["超轻黏土/报纸浆", "水彩颜料", "彩色卡纸", "食用油"] },
+
+      // 6. 我国三种传统陶器
+      { text: "在马来西亚，著名的传统黑色储水陶罐被称为", answer: "Labu Sayong", options: ["Labu Sayong", "Terendak", "Bakul Siah", "Labu Kubong"] },
+      { text: "来自于砂拉越，带有独特原住民雕刻图腾纹样的是", answer: "砂拉越陶器", options: ["砂拉越陶器", "霹雳黑陶", "吉兰丹印花陶", "马六甲青花瓷"] },
+      { text: "传统陶器在成型后，必须经过高温的", answer: "烘烤或焚烧", options: ["烘烤或焚烧", "阳光晒干", "冷藏结冰", "水洗浸泡"] },
+
+      // 7. 素描线条画法
+      { text: "在素描中，通过平行排列的直线密集程度可以表现物体的", answer: "明暗与阴影", options: ["明暗与阴影", "动态方向", "固有色彩", "材质硬度"] },
+      { text: "交叉相交的线条（Cross-hatching）在素描中常用于加深", answer: "暗部色调", options: ["暗部色调", "高光区域", "轮廓外框", "背景空白"] },
+      { text: "顺着物体曲面弧度绘制的弧形线条，能够很好地表现物体的", answer: "立体体积感", options: ["立体体积感", "绝对平面", "透明度", "反射率"] },
+
+      // 8. 拼贴材料
+      { text: "综合拼贴（Collage）可以结合平面的纸张与具有触觉纹理的", answer: "实物材料", options: ["实物材料", "水墨涂层", "气态颜料", "光线投影"] },
+      { text: "在选择拼贴材料时，利用瓦楞纸、毛线或气泡膜是为了增加画面的", answer: "肌理质感", options: ["肌理质感", "文字信息", "透明程度", "重量感"] },
+      { text: "将废旧报纸、杂志切片剪裁后重新组装粘贴的艺术手法是", answer: "拼贴画", options: ["拼贴画", "版画拓印", "金线刺绣", "刮画艺术"] },
+
+      // 9. 古拉姆（Kolam）
+      { text: "古拉姆（Kolam）是马来西亚印度同胞在节日时用彩米绘制于", answer: "地面上的图案", options: ["地面上的图案", "墙壁上的挂画", "衣服上的刺绣", "天花板上的吊饰"] },
+      { text: "绘制古拉姆传统的材料除了染色大米外，还常常使用", answer: "面粉或石膏粉", options: ["面粉或石膏粉", "油漆颜料", "橡皮泥", "水彩颜料"] },
+      { text: "古拉姆的图案设计通常具有极强对称性，代表着吉祥与", answer: "欢迎与祝福", options: ["欢迎与祝福", "严肃警戒", "悲伤怀念", "商业广告"] },
+
+      // 10. 金线刺绣（Keringkam）
+      { text: "砂拉越传统金线刺绣（Keringkam）所使用的核心刺绣线材是", answer: "金色金属镀线", options: ["金色金属镀线", "普通棉线", "塑料绳", "羊毛线"] },
+      { text: "金线刺绣（Keringkam）通常被刺绣在透明度较高、质地轻盈的", answer: "纱巾或头巾上", options: ["纱巾或头巾上", "帆布包上", "牛仔裤上", "厚重地毯上"] },
+      { text: "传统金线刺绣与普通针线绣相比，其工艺要求极其精细，且材料", answer: "昂贵而华丽", options: ["昂贵而华丽", "廉价易得", "易于冲洗", "无法长期保存"] }
+    ];
+
+    let currentQIndex = 0;
+    let selectedOption = null;
+    let unlockedCount = 0;
+
+    // 初始化页面
+    window.onload = function() {
+      initGallery();
+      loadQuestion();
+    };
+
+    // 初始化集邮墙
+    function initGallery() {
+      const gallery = document.getElementById("gallery");
+      gallery.innerHTML = "";
+      for (let i = 0; i < 30; i++) {
+        const slot = document.createElement("div");
+        slot.className = "avatar-slot";
+        slot.id = `slot-${i}`;
+        slot.innerText = characters[i].icon;
+        slot.title = characters[i].name;
+        gallery.appendChild(slot);
+      }
+    }
+
+    // 加载题目
+    function loadQuestion() {
+      const q = quizData[currentQIndex];
+      document.getElementById("current-q").innerText = currentQIndex + 1;
+      document.getElementById("progress-bar").style.width = `${((currentQIndex + 1) / 30) * 100}%`;
+
+      // 组装带拖拽框的题目 HTML
+      const parts = q.text.split(q.answer);
+      // 如果没有直接匹配（安全处理），就直接放在最后
+      let qHtml = "";
+      if(q.text.includes(q.answer)){
+        const splitText = q.text.split(q.answer);
+        qHtml = `${currentQIndex + 1}. ${splitText[0]} <span class="drop-target" id="drop-zone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></span> ${splitText[1]}`;
+      } else {
+        qHtml = `${currentQIndex + 1}. ${q.text} <span class="drop-target" id="drop-zone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></span>`;
+      }
+      document.getElementById("question-text").innerHTML = qHtml;
+
+      // 打乱选项顺序
+      const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+      
+      const optionsBox = document.getElementById("options-box");
+      optionsBox.innerHTML = "";
+      shuffledOptions.forEach((opt, idx) => {
+        const optBtn = document.createElement("div");
+        optBtn.className = "draggable-option";
+        optBtn.draggable = true;
+        optBtn.innerText = opt;
+        optBtn.id = `opt-${idx}`;
+        
+        // 绑定拖拽事件
+        optBtn.ondragstart = (e) => dragStart(e, opt);
+        // 绑定点击事件（兼顾移动端/方便点击操作）
+        optBtn.onclick = () => selectOptionByClick(opt, optBtn);
+
+        optionsBox.appendChild(optBtn);
+      });
+
+      // 重置按钮状态
+      document.getElementById("btn-submit").style.display = "inline-block";
+      document.getElementById("btn-next").style.display = "none";
+      selectedOption = null;
+    }
+
+    // 拖拽逻辑
+    function dragStart(e, val) {
+      e.dataTransfer.setData("text", val);
+      selectedOption = val;
+    }
+
+    function allowDrop(e) {
+      e.preventDefault();
+      document.getElementById("drop-zone").classList.add("hover");
+    }
+
+    function dragLeave(e) {
+      document.getElementById("drop-zone").classList.remove("hover");
+    }
+
+    function drop(e) {
+      e.preventDefault();
+      const dropZone = document.getElementById("drop-zone");
+      dropZone.classList.remove("hover");
+      const val = e.dataTransfer.getData("text");
+      fillDropZone(val);
+    }
+
+    // 点击方式选择
+    function selectOptionByClick(val, element) {
+      document.querySelectorAll(".draggable-option").forEach(el => el.classList.remove("selected"));
+      element.classList.add("selected");
+      fillDropZone(val);
+    }
+
+    function fillDropZone(val) {
+      selectedOption = val;
+      const dropZone = document.getElementById("drop-zone");
+      dropZone.innerText = val;
+      dropZone.classList.add("filled");
+      dropZone.classList.remove("incorrect", "correct");
+    }
+
+    // 检查答案
+    function checkAnswer() {
+      if (!selectedOption) {
+        alert("请先选择或拖拽一个选项填入空格！");
+        return;
+      }
+
+      const q = quizData[currentQIndex];
+      const dropZone = document.getElementById("drop-zone");
+
+      if (selectedOption === q.answer) {
+        dropZone.classList.add("correct");
+        
+        // 解锁卡通人物
+        unlockCharacter(currentQIndex);
+
+        document.getElementById("btn-submit").style.display = "none";
+        document.getElementById("btn-next").style.display = "inline-block";
+      } else {
+        dropZone.classList.add("incorrect");
+        alert("答案不太对哦，再试一次吧！");
+      }
+    }
+
+    // 解锁角色与展示弹窗
+    function unlockCharacter(index) {
+      const slot = document.getElementById(`slot-${index}`);
+      if (!slot.classList.contains("unlocked")) {
+        slot.classList.add("unlocked");
+        unlockedCount++;
+        document.getElementById("score").innerText = unlockedCount;
+        document.getElementById("collected-count").innerText = `${unlockedCount} / 30`;
+
+        // 显示弹窗
+        document.getElementById("modal-char-icon").innerText = characters[index].icon;
+        document.getElementById("modal-char-name").innerText = characters[index].name;
+        document.getElementById("reward-modal").classList.add("active");
+      }
+    }
+
+    function closeModal() {
+      document.getElementById("reward-modal").classList.remove("active");
+    }
+
+    // 下一题
+    function nextQuestion() {
+      currentQIndex++;
+      if (currentQIndex < quizData.length) {
+        loadQuestion();
+      } else {
+        alert(`🎉 恭喜你完成了全部 30 道题目，成功收集了 ${unlockedCount} 个卡通伙伴！`);
+      }
+    }
+  </script>
+</body>
+</html>
